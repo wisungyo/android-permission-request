@@ -16,12 +16,13 @@ import androidx.core.app.ActivityCompat
 import com.binar.permissionapp.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.*
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    lateinit var locationRequest: LocationRequest
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
     private var PERMISSION_ID: Int = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,13 +33,13 @@ class MainActivity : AppCompatActivity() {
         val inputUrl = binding.etInput
         val btnLocation = binding.btnSendLocation
         val btnSend = binding.btnSend
-        var urlImage = "https://3.bp.blogspot.com/-qDc5kIFIhb8/UoJEpGN9DmI/AAAAAAABl1s/BfP6FcBY1R8/s1600/BlueHead.jpg"
         setContentView(view)
 
         // remove action bar
         this.supportActionBar?.hide()
 
-        // default image
+        // set default image
+        var urlImage = "https://3.bp.blogspot.com/-qDc5kIFIhb8/UoJEpGN9DmI/AAAAAAABl1s/BfP6FcBY1R8/s1600/BlueHead.jpg"
         Glide.with(this).load(urlImage).circleCrop().into(image)
 
         // change image from internet
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
             Glide.with(this).load(urlImage).circleCrop().into(image)
         }
 
+        // initiate the fusedLocationProviderClient
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         // get user location
@@ -58,16 +60,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun userLocation(){
         // first a check permissions
-        if(CheckPermission()){
+        if(checkPermission()){
             // now we check the location permissions is enabled
             if(isLocationEnabled()){
                 // get location
                 if (ActivityCompat.checkSelfPermission(
                         this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                        Manifest.permission.ACCESS_FINE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                         this,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     // TODO: Consider calling
@@ -80,39 +82,38 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener{ task ->
-                    var location: Location? = task.result
+                    val location: Location? = task.result
                     if (location == null ){
 
                     } else {
                         // location.latitude will return the latitude coordinate
-                        // location.longtitude will return the longtitude coordinate
-//                        textView.text="your location coordinates are : \n Lat: " + location.latitude+"; Long :" + location.longitude+
-//                                "\n your city: "+getCityName(location.latitude,location.longitude) + " , your country: " +getCountryName(location.latitude,location.longitude)
-                        Toast.makeText(this,"kordinat lokasi lat : ${location.latitude} , long : ${location.longitude}",Toast.LENGTH_SHORT).show()
+                        // location.longitude will return the longitude coordinate
+                        tv_location_value.text="${getCityName(location.latitude,location.longitude)}, ${getCountryName(location.latitude,location.longitude)}"
+                        Toast.makeText(this,"Coordinate lat: ${location.latitude}, long: ${location.longitude}",Toast.LENGTH_SHORT).show()
                     }
                 }
             }else {
                 Toast.makeText(this,"please enable your location service",Toast.LENGTH_SHORT).show()
             }
         }else{
-            RequestPermission()
+            requestPermission()
         }
     }
 
-    private fun getNewLocation(){
+    private fun getNewLocation() {
         locationRequest = LocationRequest()
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationRequest.interval = 0
         locationRequest.fastestInterval = 0
         locationRequest.numUpdates = 2
 
-        // opsional
+        // optional
         if (ActivityCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // TODO: Consider calling
@@ -124,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             // for ActivityCompat#requestPermissions for more details.
             return
         }
-        // end opsional
+        // end optional
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest,locationCallback, Looper.myLooper()
         )
@@ -132,17 +133,17 @@ class MainActivity : AppCompatActivity() {
 
     private val locationCallback = object : LocationCallback(){
         override fun onLocationResult(p0: LocationResult) {
-            var lastLocation= p0.lastLocation
+            val lastLocation= p0.lastLocation
             // set new name location
-//            textView.text="your location coordinates are : \n Lat: " + lastLocation.latitude+"; Long :" + lastLocation.longitude
+            tv_location_value.text="your location coordinates are : \n Lat: " + lastLocation.latitude+"; Long :" + lastLocation.longitude
         }
     }
 
     // create fun to check the uses permissions
-    private fun CheckPermission():Boolean{
+    private fun checkPermission():Boolean{
         if(
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ){
             return true
         }
@@ -150,39 +151,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     // fun allow to get user permission
-    private fun RequestPermission(){
+    private fun requestPermission(){
         ActivityCompat.requestPermissions(
             this,
-            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.ACCESS_COARSE_LOCATION),PERMISSION_ID
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),PERMISSION_ID
         )
     }
 
     // function to check if the location of the device is enable
     private fun isLocationEnabled():Boolean{
-        var locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
     // function to get city name
     private fun getCityName(lat:Double, long:Double):String{
-        var cityName =""
-        var geoCoder = Geocoder(this, Locale.getDefault())
-        var Adress : MutableList<Address> = geoCoder.getFromLocation(lat,long,1)
-        cityName = Adress.get(0).locality
+        val cityName: String
+        val geoCoder = Geocoder(this, Locale.getDefault())
+        val address : MutableList<Address> = geoCoder.getFromLocation(lat,long,1)
+        cityName = address[0].locality
         return cityName
     }
 
     // create function return the country name
     private fun getCountryName(lat:Double, long:Double):String{
-        var countryName =""
-        var geoCoder = Geocoder(this, Locale.getDefault())
-        var Adress : MutableList<Address> = geoCoder.getFromLocation(lat,long,1)
+        val countryName: String
+        val geoCoder = Geocoder(this, Locale.getDefault())
+        val address : MutableList<Address> = geoCoder.getFromLocation(lat,long,1)
 
-        countryName = Adress.get(0).countryName
+        countryName = address[0].countryName
 
         return countryName
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -190,7 +190,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         // function to check the permissions result
-        // use it just for debuging our code
+        // use it just for debugging our code
         if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             Log.d("Debug","you have the permissions ")
         }
