@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PermissionApp</string>
+    <string name="image_from_internet">Image From Internet</string>
+</resources>
